@@ -9,11 +9,18 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Requests\UpdateUserRoleRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+
 
 class UserController extends Controller
 {
+    use AuthorizesRequests;
+
     public function register(RegisterRequest $request)
     {
+
+        $this->authorize('create', arguments: $request->user());
+
         $payload = $request->validated();
 
         $record = User::create([
@@ -36,8 +43,7 @@ class UserController extends Controller
         if (! $user || ! Hash::check($request->password, $user->password)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
-        // If using Sanctum in future:
-        $token = $user->createToken('mobile-app-token')->plainTextToken;
+        $token = $user->createToken('access-token')->plainTextToken;
         return response()->json([
             'message' => 'Login successful',
             'token' => $token,
@@ -45,14 +51,16 @@ class UserController extends Controller
         ]);
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        $this->authorize('viewAny', arguments: $request->user());
         $users = User::all();
         return response()->json($users);
     }
    
-    public function getByRole($role)
+    public function getByRole(Request $request, $role)
     {
+        $this->authorize('viewByRole', arguments: $request->user());
         $users = User::where('role', $role)->get();
         return response()->json($users);
     }
@@ -60,6 +68,7 @@ class UserController extends Controller
     public function update(UpdateUserRequest $request, $id)
     {
         $user = User::findOrFail($id);
+        $this->authorize('update', arguments: [$request->user(), $user]);
         $user->update($request->only(['name', 'age', 'location']));
         return response()->json([
             'message' => 'User updated successfully.',
@@ -69,6 +78,7 @@ class UserController extends Controller
 
     public function updateUserRole(UpdateUserRoleRequest $request, $id)
     {    
+        $this->authorize('assignRoles', arguments: $request->user());
         $user = User::findOrFail($id);
         $user->role = $request->role;
         $user->save();

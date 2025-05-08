@@ -6,10 +6,12 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class RegisterRequest extends FormRequest
+class UpdateUserRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
+     *
+     * @return bool
      */
     public function authorize(): bool
     {
@@ -19,25 +21,18 @@ class RegisterRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array
      */
-    public function rules(): array
+    public function rules()
     {
         return [
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6',
+            'name' => 'nullable|string|max:255',
+            'age' => 'nullable|integer|min:18|max:100', 
+            'location' => 'nullable|string|max:255'
         ];
     }
 
-    public function messages(): array
-    {
-        return [
-            'email.unique' => 'This email address is already registered.',
-        ];
-    }
-
-        /**
+            /**
      * Handle a failed validation attempt.
      *
      * @param \Illuminate\Contracts\Validation\Validator $validator

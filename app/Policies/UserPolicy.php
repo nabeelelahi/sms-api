@@ -12,7 +12,7 @@ class UserPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin() || $user->isTeacher();
+        return $user->isAdmin();
     }
 
     /**
@@ -20,7 +20,7 @@ class UserPolicy
      */
     public function viewByRole(User $user): bool
     {
-        return $user->isAdmin();
+        return $user->isAdmin() || $user->isTeacher();
     }
 
     /**

@@ -27,7 +27,7 @@ class UpdateUserRequest extends FormRequest
     {
         return [
             'name' => 'nullable|string|max:255',
-            'age' => 'nullable|integer|min:18|max:100', 
+            'age' => 'nullable|integer|max:100', 
             'location' => 'nullable|string|max:255'
         ];
     }

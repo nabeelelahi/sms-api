@@ -11,6 +11,9 @@ Route::prefix('user')->group(function () {
         Route::get('/', [UserController::class, 'index']);
         Route::get('/{role}/role', [UserController::class, 'getByRole']); 
         Route::put('/{id}', [UserController::class, 'update']); 
+        Route::delete('/{id}', [UserController::class, 'destroy']); 
         Route::put('/{id}/role', [UserController::class, 'updateUserRole']);
+        Route::post('/logout', [UserController::class, 'logout']);
+
     });
 });

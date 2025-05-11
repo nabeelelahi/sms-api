@@ -26,13 +26,15 @@ class UserController extends Controller
         $record = User::create([
             'name' => $payload['name'],
             'email' => $payload['email'],
+            'age' => $payload['age'],
+            'residence' => $payload['residence'],
             'password' => Hash::make($payload['password']),
             'role' => User::ROLE_STUDENT,
         ]);
 
         return response()->json([
             'message' => 'Registration successful!',
-            'user' => $record
+            'data' => $record
         ], 201);
     }
 
@@ -40,14 +42,14 @@ class UserController extends Controller
     public function login(LoginRequest $request)
     {
         $user = User::where('email', $request->email)->first();
-        if (! $user || ! Hash::check($request->password, $user->password)) {
+        if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
         $token = $user->createToken('access-token')->plainTextToken;
         return response()->json([
             'message' => 'Login successful',
             'token' => $token,
-            'user' => $user,
+            'data' => $user,
         ]);
     }
 
@@ -57,7 +59,7 @@ class UserController extends Controller
         $users = User::all();
         return response()->json($users);
     }
-   
+
     public function getByRole(Request $request, $role)
     {
         $this->authorize('viewByRole', arguments: $request->user());
@@ -72,19 +74,39 @@ class UserController extends Controller
         $user->update($request->only(['name', 'age', 'location']));
         return response()->json([
             'message' => 'User updated successfully.',
-            'user' => $user
+            'data' => $user
         ]);
     }
 
     public function updateUserRole(UpdateUserRoleRequest $request, $id)
-    {    
+    {
         $this->authorize('assignRoles', arguments: $request->user());
         $user = User::findOrFail($id);
         $user->role = $request->role;
         $user->save();
         return response()->json([
             'message' => 'User role updated successfully.',
-            'user' => $user
+            'data' => $user
+        ]);
+    }
+
+    public function destroy(Request $request, $id)
+    {
+        $this->authorize('delete', arguments: $request->user());
+        $user = User::findOrFail($id);
+        $user->delete();
+        return response()->json([
+            'message' => 'User role deleted successfully.',
+        ]);
+    }
+
+    public function logout(Request $request)
+    {
+        // Revoke the current access token
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            'message' => 'Logged out successfully'
         ]);
     }
 
